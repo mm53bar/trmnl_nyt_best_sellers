@@ -1,0 +1,80 @@
+{% comment %}
+  Half vertical template for NYT Best Sellers
+{% endcomment %}
+
+{% if debug_mode %}
+<div class="debug-panel" style="font-size: 8px;">
+  <div class="debug-data">
+    <span class="debug-key">Books:</span>
+    <span class="debug-value">{% if books %}{{ books.size }}{% else %}0{% endif %}</span>
+  </div>
+  <div class="debug-data">
+    <span class="debug-key">Mode:</span>
+    <span class="debug-value">{{ display }}</span>
+  </div>
+</div>
+{% endif %}
+
+{% if has_error %}
+  <div class="layout layout--col justify--center align--center h-full">
+    <div class="error-message">
+      <div class="title">Error Loading Data</div>
+      <div class="content">{{ error_message }}</div>
+    </div>
+  </div>
+{% else %}
+
+  {% if display == 'list' %}
+  <div class="layout layout--row">
+    <div class="w--full">
+      {% for book in books limit: 5 %}
+        <div class="item mb--1">
+          <div class="meta w--5">
+            <span class="label label--xsmall text-stroke">{{ book.rank }}</span>
+          </div>
+          <div class="content flex flex--row flex--stretch align--middle gap--small">
+            <div class="">
+              <div><span class="label label--xsmall label--underline">{{ book.title }}</span></div>
+              <div>
+                <span class="description label--xxsmall">
+                  {{ book.author | default: book.contributor }}
+                  {% if book.asterisk != 0 %}*{% endif %}
+                  {% if book.dagger != 0 %}&dagger;{% endif %}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if display == 'covers' or display == blank %}
+  <div class="layout layout--row">
+    <div class="grid grid--cols-2 gap--small">
+    {% for book in books limit: 4 %}
+      <div class="flex flex--column align--middle justify--center text--center" style="position:relative;">
+        {% if book.book_image != blank %}
+          <img src="{{ book.book_image }}" width="90" class="image image-dither book-cover" />
+          <div class="book-rank">#{{ book.rank }}</div>
+        {% else %}
+          <div class="title title--xsmall" style="height: 90px; width: 60px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center;">
+            {{ book.title }}
+          </div>
+          <div class="book-rank">#{{ book.rank }}</div>
+        {% endif %}
+      </div>
+    {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="title_bar">
+    <img class="image image-stroke" src="data:image/svg+xml;base64,{{ nyt_svg | base64_encode }}" style="height: 16px;" />
+    <span class="title">{{ list }}</span>
+    <span class="instance">{{ trmnl.plugin_settings.instance_name }}</span>
+    {% if debug_mode %}<span style="font-size: 8px;">Debug: On</span>{% endif %}
+  </div>
+
+{% endif %}

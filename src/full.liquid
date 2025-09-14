@@ -1,0 +1,146 @@
+{% comment %}
+  Full screen template for NYT Best Sellers
+{% endcomment %}
+
+{% if debug_mode %}
+<div class="debug-panel">
+  <h3>NYT Best Sellers Debug Panel</h3>
+
+  <div class="debug-data">
+    <span class="debug-key">API Status:</span>
+    <span class="debug-value">{{ status }}</span>
+  </div>
+
+  <div class="debug-data">
+    <span class="debug-key">Has Results:</span>
+    <span class="debug-value">{% if results %}Yes{% else %}No{% endif %}</span>
+  </div>
+
+  <div class="debug-data">
+    <span class="debug-key">Books Count:</span>
+    <span class="debug-value">{% if books %}{{ books.size }}{% else %}0{% endif %}</span>
+  </div>
+
+  <div class="debug-data">
+    <span class="debug-key">Display Mode:</span>
+    <span class="debug-value">{{ display }}</span>
+  </div>
+
+  <div class="debug-data">
+    <span class="debug-key">List Name:</span>
+    <span class="debug-value">{{ list }}</span>
+  </div>
+
+  <div class="debug-data">
+    <span class="debug-key">List Date:</span>
+    <span class="debug-value">{{ list_date }}</span>
+  </div>
+
+  <div class="debug-data">
+    <span class="debug-key">First Book:</span>
+    <span class="debug-value">{% if books.first %}{{ books.first.title }} by {{ books.first.author }}{% else %}None{% endif %}</span>
+  </div>
+
+  <div class="debug-data">
+    <span class="debug-key">API Response:</span>
+    <span class="debug-value" style="max-height: 100px; overflow: auto; display: block;">{{ api_response }}</span>
+  </div>
+</div>
+{% endif %}
+
+{% if has_error %}
+  <div class="layout layout--col justify--center align--center h-full">
+    <div class="error-message">
+      <div class="title">Error Loading Data</div>
+      <div class="content">{{ error_message }}</div>
+    </div>
+  </div>
+{% else %}
+
+
+  {% if display == 'list' %}
+  <div class="layout layout--row">
+    <div class="w--full" style="column-count: 2">
+      {% for book in books limit: display_count %}
+      <div class="item mb--2">
+        <div class="meta w--5">
+          <span class="label label--small text-stroke">{{ book.rank }}</span>
+        </div>
+        {% if forloop.index == 1 %}
+        <div class="content flex flex--row gap--medium">
+          {% if book.book_image != blank %}
+          <div class="w--36">
+            <img src="{{ book.book_image }}" width="125" class="image image-dither book-cover" />
+          </div>
+          {% endif %}
+          <div class="stretch">
+            <div class="title title--medium clamp--3 clamp--nicely">{{ book.title }}</div>
+            <div class="label label--small clamp--3 clamp--nicely">by {{ book.author | default: book.contributor }}</div>
+            <div class="stretch">
+              <span class="description clamp--4 clamp--nicely">
+                {% if book.asterisk != 0 %}*{% endif %}
+                {% if book.dagger != 0 %}&dagger;{% endif %}
+                {% if book.description != blank %}
+                {{ book.description }}
+                {% else %}
+                Publisher: {{ book.publisher | default: "" }}
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="content flex flex--row gap--medium">
+          <div class="stretch">
+            <div><span class="label label--small label--underline">{{ book.title }}</span></div>
+            <div class="label">{{ book.author | default: book.contributor }}</div>
+            <div class="stretch">
+              <span class="description clamp--2 clamp--nicely">
+                {% if book.asterisk != 0 %}*{% endif %}
+                {% if book.dagger != 0 %}&dagger;{% endif %}
+                {% if book.description != blank %}
+                {{ book.description }}
+                {% else %}
+                Publisher: {{ book.publisher | default: "" }}
+                {% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if display == 'covers' or display == blank %}
+  <div class="layout layout--row">
+    <div class="grid grid--cols-5 gap--medium">
+    {% for book in books limit: display_count %}
+      <div class="flex flex--column align--middle justify--center text--center" style="position:relative;">
+        {% if book.book_image != blank %}
+          <img src="{{ book.book_image }}" width="125" class="image image-dither book-cover" />
+          <div class="book-rank">#{{ book.rank }}</div>
+        {% else %}
+          <div class="title title--small" style="height: 125px; width: 80px; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center;">
+            {{ book.title }}
+          </div>
+          <div class="book-rank">#{{ book.rank }}</div>
+        {% endif %}
+      </div>
+    {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="title_bar">
+    <img class="image image-stroke" src="data:image/svg+xml;base64,{{ nyt_svg | base64_encode }}" />
+    <span class="title">{{ list }} for {{ list_date | date: '%B %-d, %Y' }}</span>
+    <span class="instance">{{ trmnl.plugin_settings.instance_name }}</span>
+  </div>
+
+  {% if debug_mode %}
+  <div style="position: fixed; bottom: 5px; right: 5px; font-size: 10px; color: #999;">Debug: On</div>
+  {% endif %}
+{% endif %}

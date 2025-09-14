@@ -1,0 +1,19 @@
+# Ignore bundler config
+/.bundle
+
+# Ignore local .env file with secrets
+.env
+
+# Ignore vendor directory with gems
+/vendor
+
+# Ignore temporary files
+.DS_Store
+*.swp
+*~
+.vscode/
+.idea/
+
+# Ignore development server logs
+/log/
+/tmp/

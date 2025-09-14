@@ -1,0 +1,79 @@
+---
+strategy: polling
+no_screen_padding: "no"
+dark_mode: "no"
+static_data: ""
+polling_verb: get
+polling_url: https://api.nytimes.com/svc/books/v3/lists/current/{{ nyt_book_list }}.json?api-key={{ nyt_api_key }}
+polling_headers: content-type=application/json
+polling_body:
+id: nyt_best_sellers
+custom_fields:
+  - keyname: author_bio
+    name: About This Plugin
+    field_type: author_bio
+    description: "Display the New York Times Best Sellers lists on your TRMNL e-ink display."
+    github_url: https://github.com/yourusername/nyt_best_sellers
+    learn_more_url: https://www.nytimes.com/books/best-sellers/
+  - keyname: nyt_api_key
+    field_type: password
+    name: NYT API Key
+    description: Required for accessing the New York Times Books API.
+    placeholder: Your NYT API Key
+    help_text: Create a free account at <a href="https://developer.nytimes.com/" class="underline">developer.nytimes.com</a> and enable the Books API.
+  - keyname: nyt_book_list
+    field_type: select
+    name: Best Seller Category
+    description: Select which New York Times best seller list to display
+    default: hardcover-fiction
+    help_text: The New York Times publishes multiple ranked lists across different book categories
+    options:
+      - Advice, How-To & Miscellaneous: advice-how-to-and-miscellaneous
+      - Audio Fiction: audio-fiction
+      - Audio Nonfiction: audio-nonfiction
+      - Business: business-books
+      - Children's & Young Adult Series: series-books
+      - Children's Middle Grade Hardcover: childrens-middle-grade-hardcover
+      - Children's Picture Books: picture-books
+      - Combined Print & E-Book Fiction: combined-print-and-e-book-fiction
+      - Combined Print & E-Book Nonfiction: combined-print-and-e-book-nonfiction
+      - Graphic Books and Manga: graphic-books-and-manga
+      - Hardcover Fiction: hardcover-fiction
+      - Hardcover Nonfiction: hardcover-nonfiction
+      - Mass Market: mass-market-monthly
+      - Middle Grade Paperback: middle-grade-paperback-monthly
+      - Paperback Nonfiction: paperback-nonfiction
+      - Paperback Trade Fiction: trade-fiction-paperback
+      - Young Adult Hardcover: young-adult-hardcover
+      - Young Adult Paperback: young-adult-paperback-monthly
+  - keyname: nyt_display
+    field_type: select
+    name: Display Format
+    description: Choose how to present the best seller books
+    default: covers
+    help_text: Select a visual style that works best for your e-ink display
+    options:
+      - Detailed List View: list
+      - Book Cover Grid: covers
+  - keyname: display_count
+    field_type: select
+    name: Books to Display
+    description: Number of top-ranked books to show
+    default: "10"
+    help_text: Larger values show more books but may require scrolling on smaller displays
+    options:
+      - Top 5 Books: "5"
+      - Top 10 Books: "10"
+      - Top 15 Books: "15"
+  - keyname: show_debug
+    field_type: select
+    name: Show Debug Information
+    description: Enable or disable debugging information display
+    default: "no"
+    help_text: Only enable when troubleshooting issues with the plugin
+    options:
+      - No: "no"
+      - Yes: "yes"
+name: New York Times Best Sellers
+version: 1.0.0
+refresh_interval: 1440
