@@ -75,5 +75,5 @@ custom_fields:
       - No: "no"
       - Yes: "yes"
 name: New York Times Best Sellers
-version: 0.1.0
+version: 0.1.1
 refresh_interval: 1440
