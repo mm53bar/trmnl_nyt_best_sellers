@@ -2,9 +2,12 @@
 set -e
 
 # Usage information
-if [ $# -ne 1 ] || [[ ! "$1" =~ ^(major|minor|patch)$ ]]; then
-  echo "Usage: $0 [major|minor|patch]"
+if [ $# -lt 1 ] || [[ ! "$1" =~ ^(major|minor|patch)$ ]]; then
+  echo "Usage: $0 [major|minor|patch] [options]"
   echo "Example: $0 patch"
+  echo ""
+  echo "Options:"
+  echo "  --push    Automatically push changes without confirmation"
   exit 1
 fi
 
@@ -66,13 +69,37 @@ if [ -f "$SETTINGS_FILE" ]; then
 fi
 git commit -m "Bump version to v$NEW_VERSION"
 
-# Create and push tag
+# Create tag
 git tag "v$NEW_VERSION"
 
 echo "Version bumped from $CURRENT_VERSION to $NEW_VERSION"
 echo "Changes committed and tag v$NEW_VERSION created"
 echo ""
-echo "To complete the release process:"
-echo "git push origin main && git push origin v$NEW_VERSION"
-echo ""
-echo "This will trigger the GitHub Actions workflow to create a release."
+
+# Check for --push flag
+if [[ "$*" == *"--push"* ]]; then
+  SKIP_CONFIRM=true
+else
+  SKIP_CONFIRM=false
+fi
+
+# Ask for confirmation before pushing
+if [ "$SKIP_CONFIRM" = false ]; then
+  read -p "Push changes and trigger release now? (y/n) " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Push skipped. To complete the release process manually:"
+    echo "git push origin main && git push origin v$NEW_VERSION"
+    exit 0
+  fi
+fi
+
+# Push changes and tag
+echo "Pushing changes to remote..."
+if git push origin main && git push origin "v$NEW_VERSION"; then
+  echo "✅ Push successful! GitHub Actions workflow will create a release."
+else
+  echo "❌ Push failed. Please push manually:"
+  echo "git push origin main && git push origin v$NEW_VERSION"
+  exit 1
+fi

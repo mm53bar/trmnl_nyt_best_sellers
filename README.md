@@ -141,29 +141,39 @@ This plugin uses an automated release process:
 3. Run the version bump script:
 
 ```bash
-# To increment the patch version (0.0.1 -> 0.0.2)
+# Interactive mode - will prompt before pushing
 bin/bump-version patch
 
-# To increment the minor version (0.0.1 -> 0.1.0)
-bin/bump-version minor
+# Automatic push mode - no confirmation needed
+bin/bump-version patch --push
 
-# To increment the major version (0.0.1 -> 1.0.0)
+# Other version increments
+bin/bump-version minor
 bin/bump-version major
 ```
 
-4. Push the changes and tag:
+The script will:
 
-```bash
-git push origin main && git push origin v[VERSION]
-```
+- Update the version in VERSION file and settings.yml
+- Commit these changes
+- Create a git tag for the new version
+- Prompt to push changes (unless --push flag is used)
+- Push both the commit and tag if confirmed
 
-The GitHub Actions workflow will automatically:
+When the tag is pushed, the GitHub Actions workflow will automatically:
 
 - Create a release on GitHub
 - Package the plugin (only including necessary files) into the `dist` directory
 - Attach the zip file to the release
+- Include the version number in the plugin name
 
 The resulting .zip file can be downloaded from GitHub Releases and uploaded to your TRMNL BYOS server.
+
+If you prefer to push manually, you can skip the confirmation in the bump-version script and push yourself:
+
+```bash
+git push origin main && git push origin v[VERSION]
+```
 
 ## Environment Variables
 
