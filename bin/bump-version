@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+set -e
+
+# Usage information
+if [ $# -ne 1 ] || [[ ! "$1" =~ ^(major|minor|patch)$ ]]; then
+  echo "Usage: $0 [major|minor|patch]"
+  echo "Example: $0 patch"
+  exit 1
+fi
+
+# Read current version
+VERSION_FILE="VERSION"
+if [ ! -f "$VERSION_FILE" ]; then
+  echo "ERROR: $VERSION_FILE not found"
+  exit 1
+fi
+
+CURRENT_VERSION=$(cat "$VERSION_FILE")
+
+# Split version into components
+IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
+MAJOR=${VERSION_PARTS[0]}
+MINOR=${VERSION_PARTS[1]}
+PATCH=${VERSION_PARTS[2]}
+
+# Bump version based on argument
+case "$1" in
+  major)
+    MAJOR=$((MAJOR + 1))
+    MINOR=0
+    PATCH=0
+    ;;
+  minor)
+    MINOR=$((MINOR + 1))
+    PATCH=0
+    ;;
+  patch)
+    PATCH=$((PATCH + 1))
+    ;;
+esac
+
+# Create new version string
+NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+
+# Update VERSION file
+echo "$NEW_VERSION" > "$VERSION_FILE"
+
+# Update version in settings.yml
+SETTINGS_FILE="src/settings.yml"
+if [ -f "$SETTINGS_FILE" ]; then
+  # Use different sed syntax based on OS
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    sed -i '' "s/version: .*$/version: $NEW_VERSION/" "$SETTINGS_FILE"
+  else
+    # Linux and others
+    sed -i "s/version: .*$/version: $NEW_VERSION/" "$SETTINGS_FILE"
+  fi
+  echo "Updated version in $SETTINGS_FILE"
+fi
+
+# Commit changes
+git add "$VERSION_FILE"
+if [ -f "$SETTINGS_FILE" ]; then
+  git add "$SETTINGS_FILE"
+fi
+git commit -m "Bump version to v$NEW_VERSION"
+
+# Create and push tag
+git tag "v$NEW_VERSION"
+
+echo "Version bumped from $CURRENT_VERSION to $NEW_VERSION"
+echo "Changes committed and tag v$NEW_VERSION created"
+echo ""
+echo "To complete the release process:"
+echo "git push origin main && git push origin v$NEW_VERSION"
+echo ""
+echo "This will trigger the GitHub Actions workflow to create a release."

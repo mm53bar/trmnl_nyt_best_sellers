@@ -1,0 +1,85 @@
+name: Release Plugin
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+env:
+  PLUGIN_NAME: nyt_best_sellers
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.4"
+          bundler-cache: true
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "ZIP_FILE=$PLUGIN_NAME-$VERSION.zip" >> $GITHUB_ENV
+
+      - name: Validate plugin structure
+        run: |
+          # Basic validation
+          if [ ! -f "src/settings.yml" ]; then
+            echo "ERROR: src/settings.yml is missing"
+            exit 1
+          fi
+
+          # Check for required templates
+          REQUIRED_TEMPLATES=("full.liquid" "half_horizontal.liquid" "half_vertical.liquid" "quadrant.liquid" "shared.liquid")
+          for template in "${REQUIRED_TEMPLATES[@]}"; do
+            if [ ! -f "src/$template" ]; then
+              echo "ERROR: src/$template is missing"
+              exit 1
+            fi
+          done
+
+          # Make sure VERSION matches tag
+          if [ -f "VERSION" ]; then
+            FILE_VERSION=$(cat VERSION)
+            if [ "$FILE_VERSION" != "${{ env.VERSION }}" ]; then
+              echo "ERROR: VERSION file ($FILE_VERSION) doesn't match tag (${{ env.VERSION }})"
+              exit 1
+            fi
+          fi
+
+          echo "Plugin structure validation passed"
+
+      - name: Prepare plugin package
+        run: |
+          mkdir -p dist/plugin
+
+          # Only copy needed files (settings.yml and *.liquid templates)
+          cp src/settings.yml dist/plugin/
+          cp src/*.liquid dist/plugin/
+
+          # Update version in settings.yml
+          if [ -f "dist/plugin/settings.yml" ]; then
+            sed -i "s/^version:.*/version: ${{ env.VERSION }}/" dist/plugin/settings.yml
+          fi
+
+          # Create the plugin package
+          cd dist
+          zip -r "${{ env.ZIP_FILE }}" plugin
+          cd ..
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/${{ env.ZIP_FILE }}
+          name: v${{ env.VERSION }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
