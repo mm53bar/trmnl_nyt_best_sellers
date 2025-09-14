@@ -17,3 +17,7 @@
 # Ignore development server logs
 /log/
 /tmp/
+
+# Ignore build artifacts
+/dist/
+/build/

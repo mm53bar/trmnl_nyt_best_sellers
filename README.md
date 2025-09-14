@@ -113,6 +113,25 @@ cp .env.example .env
 ./bin/dev
 ```
 
+### Local Development and Testing
+
+For testing with a local BYOS instance, you can use the packaging script:
+
+```bash
+# Create a deployable build artifact for local testing
+bin/build
+```
+
+This will:
+
+1. Create a build artifact in the `build` directory with the correct structure
+2. Include only the necessary files (settings.yml and liquid templates)
+3. Name the file according to the current version
+
+You can then upload this zip directly to your BYOS instance without going through the GitHub release process.
+
+**Note:** The local `build` directory is used for development testing, while the GitHub Actions workflow uses a `dist` directory for official releases. This separation helps distinguish between testing builds and official distribution packages.
+
 ### Release Process
 
 This plugin uses an automated release process:
@@ -141,7 +160,7 @@ git push origin main && git push origin v[VERSION]
 The GitHub Actions workflow will automatically:
 
 - Create a release on GitHub
-- Package the plugin (only including necessary files)
+- Package the plugin (only including necessary files) into the `dist` directory
 - Attach the zip file to the release
 
 The resulting .zip file can be downloaded from GitHub Releases and uploaded to your TRMNL BYOS server.

@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -e
+
+# Get version from VERSION file
+VERSION=$(cat VERSION)
+PLUGIN_NAME="nyt_best_sellers"
+ZIP_FILE="${PLUGIN_NAME}-${VERSION}.zip"
+
+# Create build directory if it doesn't exist
+mkdir -p build/plugin
+
+# Copy only the necessary files
+echo "Building plugin package..."
+cp src/settings.yml build/plugin/
+cp src/*.liquid build/plugin/
+
+# Update version in settings.yml
+echo "Updating plugin name to include version..."
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # macOS
+  sed -i '' "s/^name: \(.*\)$/name: \1 v${VERSION}/" build/plugin/settings.yml
+  sed -i '' "s/^version: .*$/version: ${VERSION}/" build/plugin/settings.yml
+else
+  # Linux and others
+  sed -i "s/^name: \(.*\)$/name: \1 v${VERSION}/" build/plugin/settings.yml
+  sed -i "s/^version: .*$/version: ${VERSION}/" build/plugin/settings.yml
+fi
+
+# Create the zip file
+echo "Creating build artifact: build/${ZIP_FILE}"
+cd build
+zip -r "${ZIP_FILE}" plugin
+cd ..
+
+# Clean up temporary plugin directory
+rm -rf build/plugin
+
+echo "✅ Plugin built successfully: build/${ZIP_FILE}"
+echo "✅ Temporary files cleaned up"
+echo ""
+echo "To install in BYOS Laravel:"
+echo "1. Upload this build artifact via the TRMNL admin interface"
+echo "2. Configure your NYT API key and other settings"

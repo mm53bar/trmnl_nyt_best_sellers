@@ -64,9 +64,10 @@ jobs:
           cp src/settings.yml dist/plugin/
           cp src/*.liquid dist/plugin/
 
-          # Update version in settings.yml
+          # Update version and name in settings.yml
           if [ -f "dist/plugin/settings.yml" ]; then
             sed -i "s/^version:.*/version: ${{ env.VERSION }}/" dist/plugin/settings.yml
+            sed -i "s/^name: \(.*\)$/name: \1 v${{ env.VERSION }}/" dist/plugin/settings.yml
           fi
 
           # Create the plugin package
