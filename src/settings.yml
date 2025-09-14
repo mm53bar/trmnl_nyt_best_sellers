@@ -13,7 +13,7 @@ custom_fields:
     name: About This Plugin
     field_type: author_bio
     description: "Display the New York Times Best Sellers lists on your TRMNL e-ink display."
-    github_url: https://github.com/yourusername/nyt_best_sellers
+    github_url: https://github.com/mm53bar/trmnl_nyt_best_sellers
     learn_more_url: https://www.nytimes.com/books/best-sellers/
   - keyname: nyt_api_key
     field_type: password
@@ -75,5 +75,5 @@ custom_fields:
       - No: "no"
       - Yes: "yes"
 name: New York Times Best Sellers
-version: 1.0.0
+version: 0.1.0
 refresh_interval: 1440
